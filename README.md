@@ -9,7 +9,7 @@ A simple movie app built using ReactJs.
 npm install
 ```
 
-## Usage
+## Start the APP
 
 ```sh
 npm start
