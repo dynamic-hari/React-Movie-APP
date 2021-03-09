@@ -1,53 +1,53 @@
 import React, {useEffect, useState} from 'react';
-import Movie from './Movie';
+import { Link } from 'react-router-dom';
 import '../index.css';
 
-const Feautered_API = "https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=04c35731a5ee918f014970082a0088b1&page=1";
+const Search_API = "https://api.themoviedb.org/3/search/movie?&api_key=04c35731a5ee918f014970082a0088b1&query=";
+const Images_API = "https://image.tmdb.org/t/p/w1280";
 
-const Search_API ="https://api.themoviedb.org/3/search/movie?&api_key=04c35731a5ee918f014970082a0088b1&query=";
+function MovieDetails(props) {
 
-function MovieDetails() {
-  
   const [ movies, setMovies] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    getMovies(Feautered_API);
+    getMovies(Search_API + props.match.params.title);
   }, []);
   
   const getMovies= (API) =>{
     fetch(API)
     .then((res => res.json()))
       .then((data) => {
-        console.log(data);
-      setMovies(data.results);
+        setMovies(data.results);
     });
-  }
-
-  const handleOnSubmit = (e) => {
-    e.preventDefault();
-
-    if(searchTerm) {
-      getMovies(Search_API + searchTerm);
-      setSearchTerm('');
-    }
-  }
-
-  const handleOnChange = (e) => {
-    setSearchTerm(e.target.value);
   }
 
   return (
       <div>
-          <header>
-            <form onSubmit={handleOnSubmit}>
-              <input className="search" type="text" placeholder="Search here..." value={searchTerm} onChange={handleOnChange}/>
-            </form>
-          </header>
           <div className="movie-container">
-            {movies.map((movie) => 
-              <Movie key={movie.id} {...movie}/>
-            )}
+              {movies
+                  .filter((movie) => movie.title === (props.match.params.title))
+                  .map((item) => {
+                return (
+                    <div className="movie-container1">
+                        <div className="content">
+                            <h1> Details </h1>
+                            <h2>{item.title} <span> ({item.release_date})</span></h2>
+                            <p className="rating">Rating: {item.vote_average}</p>
+                            <div className="plot">
+                                <img src={Images_API + item.poster_path} alt={item.title} />
+                                <p>{item.overview}</p>
+                            </div>
+                            <p>Release Date: {item.release_date}</p>
+                            <p>Total vote: {item.vote_count}</p>
+                            <p>Original Language: {item.original_language}</p>
+                            <p>Popularity count: {item.popularity}</p>
+                            <Link to ="/moviecart">    
+                                <button className="close">Close</button>
+                            </Link>
+                        </div>
+                    </div>
+                    );
+                })}
           </div>
       </div>
   );
