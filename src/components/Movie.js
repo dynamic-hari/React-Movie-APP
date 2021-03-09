@@ -1,38 +1,76 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+import MovieDetails from './MovieDetails';
 import '../index.css';
-import './MovieDetails';
+import { Route, Link} from 'react-router-dom';
 
+const Feautered_API = "https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=04c35731a5ee918f014970082a0088b1&page=";
+
+const Search_API = "https://api.themoviedb.org/3/search/movie?&api_key=04c35731a5ee918f014970082a0088b1&query=";
 
 const Images_API = "https://image.tmdb.org/t/p/w1280";
 
-const Movie = ({ title, poster_path, overview, vote_average, release_date, vote_count, original_language, genre_name, popularity }) => (
-    <div className="movie">
-        <img src={Images_API + poster_path} alt={title}/>
-        <div className="movieInfo">
-            <h3>{title}</h3>
-            <span> {vote_average} </span>
-        </div>
-        <div className="overview" tabIndex="1">
-            <h2> Overview </h2>
-            <p>{overview}</p>
-        </div>
-        <div className="popup">
-            <div className="content">
-                <h1> Details </h1>
-                <h2>{title} <span> ({release_date})</span></h2>
-                <p className="rating">Rating: {vote_average}</p>
-                <div className="plot">
-					<img src={Images_API + poster_path} alt={title} />
-                    <p>{overview}</p>
-                </div>
-                <p>Release Date: {release_date}</p>
-                <p>Total vote: {vote_count}</p>
-                <p>Original Language: {original_language}</p>
-                <p>Popularity count: {popularity}</p>
-                <button className="close">Close</button>
-            </div>
-        </div>
-    </div>
-);
+function Movie() {
+
+  const [ movies, setMovies] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  var val=1;
+
+  useEffect(() => {
+    getMovies(Feautered_API + val);
+  }, []);
+  
+  const getMovies= (API) =>{
+    fetch(API)
+    .then((res => res.json()))
+      .then((data) => {
+      setMovies(data.results);
+    });
+  }
+
+  const handleOnSubmit = (e) => {
+    e.preventDefault();
+
+    if(searchTerm) {
+      getMovies(Search_API + searchTerm);
+      setSearchTerm('');
+    }
+  }
+
+  const handleOnChange = (e) => {
+    setSearchTerm(e.target.value);
+  }
+
+  return (
+      <div>
+          <header>
+            <form onSubmit={handleOnSubmit}>
+              <input className="search" type="text" placeholder="Search here..." value={searchTerm} onChange={handleOnChange}/>
+            </form>
+          </header>
+          <div className="movie-container">
+              {movies.map((movie) => {
+                return (
+                  <div className="movie">
+                      <img src={Images_API + movie.poster_path} alt={movie.title} />
+                    <div className="movieInfo">
+                      <h3>{movie.title}</h3>
+                      <span> {movie.vote_average} </span>
+                    </div>
+                    <div className="overview">
+                        <Link
+                            to={`/moviecart/${movie.title}/details`}
+                            key={movie.title}>
+                        <h2> Overview </h2>
+                        </Link>
+                        <p>{movie.overview}</p>
+                    </div>
+                    <Route path="moviecart/:title/details" component={MovieDetails} />
+                  </div>
+                );
+            })}
+          </div>
+      </div>
+  );
+}
 
 export default Movie;
